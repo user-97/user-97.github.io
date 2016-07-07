@@ -20787,30 +20787,53 @@ var _PageControllerFactory2 = _interopRequireDefault(_PageControllerFactory);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+if (!Array.prototype.findIndex) {
+	Array.prototype.findIndex = function (predicate) {
+		if (this === null) {
+			throw new TypeError('Array.prototype.findIndex called on null or undefined');
+		}
+		if (typeof predicate !== 'function') {
+			throw new TypeError('predicate must be a function');
+		}
+		var list = Object(this);
+		var length = list.length >>> 0;
+		var thisArg = arguments[1];
+		var value;
+
+		for (var i = 0; i < length; i++) {
+			value = list[i];
+			if (predicate.call(thisArg, value, i, list)) {
+				return i;
+			}
+		}
+		return -1;
+	};
+}
+
 var app = {
-  isLoading: true,
-  storageController: null,
-  pageControllerFactory: null,
-  options: {}
+	isLoading: true,
+	storageController: null,
+	pageControllerFactory: null,
+	options: {}
 };
 
 app.start = function (storageController, pageControllerFactory) {
-  app.storageController = storageController;
-  app.pageControllerFactory = pageControllerFactory;
-  app.storageController.loadSettings(app.options);
-  app.openHome();
+	app.storageController = storageController;
+	app.pageControllerFactory = pageControllerFactory;
+	app.storageController.loadSettings(app.options);
+	app.openHome();
 };
 
 app.openHome = function () {
-  app.pageControllerFactory.pageHome().open(app.storageController);
+	app.pageControllerFactory.pageHome().open(app.storageController);
 };
 
 app.openSettings = function () {
-  app.pageControllerFactory.pageSettings().open();
+	app.pageControllerFactory.pageSettings().open();
 };
 
 app.openViewFeed = function () {
-  app.pageControllerFactory.pageViewFeed().open();
+	app.pageControllerFactory.pageViewFeed().open();
 };
 
 /*document.getElementById('bnRefresh').addEventListener('click', function() {
@@ -20819,9 +20842,9 @@ app.openViewFeed = function () {
 app.start(new _StorageController2.default(new _LocalStorageProvider2.default()), new _PageControllerFactory2.default());
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').then(function () {
-    console.log('Service Worker Registered');
-  });
+	navigator.serviceWorker.register('./service-worker.js').then(function () {
+		console.log('Service Worker Registered');
+	});
 }
 
 },{"./LocalStorageProvider.js":170,"./PageControllerFactory.js":171,"./StorageController.js":175}],178:[function(require,module,exports){
