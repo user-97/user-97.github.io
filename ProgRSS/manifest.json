@@ -22,7 +22,8 @@
       "sizes": "256x256",
       "type": "image/png"
     }],
-  "start_url": "./index.html",
+  "scope": "/ProgRSS/",
+  "start_url": "/ProgRSS/index.html",
   "display": "standalone",
   "background-color": "#25ba61",
   "theme_color": "#25ba61"
