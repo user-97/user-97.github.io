@@ -20818,6 +20818,12 @@ app.openViewFeed = function () {
 
 app.start(new _StorageController2.default(new _LocalStorageProvider2.default()), new _PageControllerFactory2.default());
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').then(function () {
+    console.log('Service Worker Registered');
+  });
+}
+
 },{"./LocalStorageProvider.js":170,"./PageControllerFactory.js":171,"./StorageController.js":175}],178:[function(require,module,exports){
 "use strict";
 
