@@ -19957,6 +19957,10 @@ var _Feed = require('./Feed.js');
 
 var _Feed2 = _interopRequireDefault(_Feed);
 
+var _FeedItem = require('./FeedItem.js');
+
+var _FeedItem2 = _interopRequireDefault(_FeedItem);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -19992,7 +19996,7 @@ var PageHomeController = function () {
 							return elem.feedUrl == feedUrl && elem.title == item.title["#text"];
 						});
 						if (!feedItem) {
-							feedItem = new FeedItem();
+							feedItem = new _FeedItem2.default();
 						}
 						feedItem.feedUrl = feedUrl;
 						feedItem.title = item.title["#text"];
@@ -20519,7 +20523,7 @@ var PageHomeController = function () {
 
 exports.default = PageHomeController;
 
-},{"./Feed.js":168,"./utils.js":178,"react":167,"react-dom":2}],173:[function(require,module,exports){
+},{"./Feed.js":168,"./FeedItem.js":169,"./utils.js":178,"react":167,"react-dom":2}],173:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
