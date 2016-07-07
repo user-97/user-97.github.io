@@ -1,4 +1,4 @@
-var cacheName = 'ProgRSS 4';
+var cacheName = 'ProgRSS 5';
 
 var filesToCache = [
   '/ProgRSS/index.html',

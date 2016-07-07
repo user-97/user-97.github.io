@@ -19999,8 +19999,8 @@ var PageHomeController = function () {
 							feedItem = new _FeedItem2.default();
 						}
 						feedItem.feedUrl = feedUrl;
-						feedItem.title = item.title["#text"];
-						feedItem.description = item.description["#text"];
+						feedItem.title = item.title["#text"] || item.title["#cdata-section"];
+						feedItem.description = item.description["#text"] || item.description["#cdata-section"];
 						feedItem.itemUrl = item.link["#text"];
 						if (typeof item.pubDate != "undefined") {
 							feedItem.date = new Date(item.pubDate["#text"]);
@@ -20894,7 +20894,7 @@ function xmlToJson(xml) {
 				obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
 			}
 		}
-	} else if (xml.nodeType == 3) {
+	} else if (xml.nodeType == 3 || xml.nodeType == 4) {
 		// text
 		obj = xml.nodeValue;
 	}
