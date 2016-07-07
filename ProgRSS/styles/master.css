@@ -1,0 +1,199 @@
+* {
+  box-sizing: border-box; }
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  border: 0;
+  font-family: inherit;
+  font-size: 100%;
+  font-style: inherit;
+  font-weight: inherit;
+  margin: 0;
+  outline: 0;
+  padding: 0;
+  vertical-align: baseline; }
+
+/* remember to define focus styles! */
+:focus {
+  outline: 0; }
+
+body {
+  background: white;
+  color: black;
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+  border-collapse: separate;
+  border-spacing: 0; }
+
+caption, th, td {
+  font-weight: normal;
+  text-align: left; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: ""; }
+
+blockquote, q {
+  quotes: "" ""; }
+
+/* Table of Contents
+ * __0__ Glossary
+ * __1__ Mixins
+ * __2__ Notes
+ * __3__ Structure
+ * __3__1 Headers 
+ * __4__ Typography
+ * __5__ Links
+ * __6__ Lists
+ * */
+/* __0__ Glossary */
+/* __1__ Mixins */
+/* __2__ Notes */
+/* LVHA for links */
+/* TRBL clockwise order for shorthand properties like border, margin, padding. */
+/* .box { @include border-radius(10px); } */
+/*
+.message {
+  border: 1px solid #ccc;
+  padding: 10px;
+  color: #333;
+}
+
+.success {
+  @extend .message;
+  border-color: green;
+}
+*/
+/* __3__ Structure */
+/* __3__1 Headers */
+header {
+  background-color: lightblue;
+  font-size: 16px;
+  padding: 10px 10px;
+  display: flex; }
+
+.header {
+  background-color: #25ba61;
+  box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.14), 0 2px 9px 1px rgba(0, 0, 0, 0.12), 0 4px 2px -2px rgba(0, 0, 0, 0.2);
+  height: 56px;
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  width: 100%;
+  top: 0px;
+  color: #fff; }
+  .header h1 {
+    flex: 1;
+    font-size: 20px;
+    margin: auto; }
+  .header button {
+    cursor: pointer; }
+  .header button:last-child {
+    margin-right: 16px; }
+
+main {
+  margin-top: 56px; }
+
+.page-home main {
+  background-color: white; }
+
+body {
+  height: 100%; }
+
+/* __4__ Typography */
+/* __5__ Links */
+/* __6__ Lists, images, etc. */
+#view-feed > main {
+  display: flex;
+  flex-wrap: wrap; }
+
+.feeds, .cached-attempts {
+  background-color: lightgreen;
+  margin-bottom: 10px; }
+
+.feeds > li, .cached-attempts > li {
+  font-size: 16px;
+  line-height: 100%;
+  padding: 5px 0px 5px 10px;
+  border-bottom: 1px solid black;
+  background-color: #EFE; }
+
+.feeds > li:first-child, .cached-attempts li:first-child {
+  border-top: 1px solid black; }
+
+.feeds > li {
+  display: flex; }
+
+.feeds > li > label {
+  flex: 1; }
+
+.feed-item {
+  border: 1px solid black;
+  border-radius: 5px;
+  margin: 10px;
+  padding: 5px 10px;
+  box-shadow: 5px 4px 3px rgba(0, 50, 50, 0.2);
+  background-color: lightblue;
+  width: 31%; }
+  .feed-item .date {
+    font-size: 16px; }
+  .feed-item h2 {
+    margin: 5px 0px; }
+  .feed-item p {
+    font-family: "Times New Roman", "serif";
+    font-size: 18px;
+    word-wrap: break-word; }
+  .feed-item a:link {
+    color: blue;
+    text-decoration: none; }
+  .feed-item a:visited {
+    color: blue; }
+  .feed-item a:hover {
+    color: green; }
+
+.feed-item.haveRead {
+  background-color: lightgreen; }
+
+@media screen and (max-width: 500px) {
+  .feed-item {
+    width: 100%; } }
+@media screen and (min-width: 501px) and (max-width: 800px) {
+  .feed-item {
+    width: 46%; } }
+.button {
+  border: 1px solid #3b3b3b;
+  border-radius: 4px;
+  background-color: #86f2e3;
+  color: #2C2C2C;
+  padding: 4px 2px;
+  margin: auto 5px;
+  padding: 4px 2px; }
+
+.button-edit {
+  border: 1px solid #3b3b3b;
+  border-radius: 4px;
+  background-color: #86f2e3;
+  color: #2C2C2C;
+  margin: 0px 10px;
+  padding: 4px 2px; }
+
+.button-remove {
+  border: 1px solid #5f0707;
+  border-radius: 4px;
+  background-color: #f97070;
+  color: white;
+  padding: 4px 2px;
+  margin-right: 16px;
+  padding: 4px 2px; }
+
