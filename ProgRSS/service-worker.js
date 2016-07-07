@@ -1,10 +1,10 @@
 var cacheName = 'ProgRSS 0';
 
 var filesToCache = [
-  '/',
-  '/index.html',
-  '/bundle.js',
-  '/styles/master.css',
+  '/ProgRSS',
+  '/ProgRSS/index.html',
+  '/ProgRSS/bundle.js',
+  '/ProgRSS/styles/master.css',
 ];
 
 self.addEventListener('install', function(e) {
