@@ -25,9 +25,5 @@
   "start_url": "/index.html",
   "display": "standalone",
   "background-color": "#25ba61",
-  "theme_color": "#25ba61",
-  "type": "privileged",
-  "permissions": {
-	  "systemXHR": {}
-  }
+  "theme_color": "#25ba61"
 }
