@@ -1,7 +1,6 @@
 var cacheName = 'ProgRSS 0';
 
 var filesToCache = [
-  '/ProgRSS',
   '/ProgRSS/index.html',
   '/ProgRSS/bundle.js',
   '/ProgRSS/styles/master.css',
