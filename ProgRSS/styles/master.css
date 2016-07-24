@@ -76,6 +76,24 @@ blockquote, q {
 }
 */
 /* __3__ Structure */
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg); }
+  100% {
+    transform: rotate(360deg); } }
+.loader {
+  left: 50%;
+  top: 50%;
+  position: absolute; }
+
+.loader #spinner {
+  stroke-dasharray: 105% 50%;
+  transform-origin: 50%;
+  stroke-linecap: round;
+  stroke-dashoffset: 3450px;
+  stroke-width: 5px;
+  animation: rotate linear 2.5s infinite; }
+
 /* __3__1 Headers */
 header {
   background-color: lightblue;
@@ -197,3 +215,22 @@ body {
   margin-right: 16px;
   padding: 4px 2px; }
 
+.control-group {
+  width: 600px;
+  display: flex;
+  position: relative; }
+
+.control-group input {
+  right: 0px; }
+
+.control-group * {
+  flex: 1; }
+
+.align-right {
+  right: 0px;
+  position: absolute; }
+
+.page-add-feed {
+  background-color: lightblue; }
+
+/*# sourceMappingURL=master.css.map */
