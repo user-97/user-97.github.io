@@ -168,7 +168,11 @@ var IndexedDbProvider = function (_StorageProvider) {
 			return new Promise(function (resolve, reject) {
 				var feedList = [];
 
-				var feeds = that.db.transaction("Feed").objectStore("Feed");
+				var trans = that.db.transaction("Feed");
+				var feeds = trans.objectStore("Feed");
+				trans.oncomplete = function () {
+					resolve(feedList);
+				};
 
 				feeds.openCursor().onsuccess = function (event) {
 					var cursor = event.target.result;
@@ -176,8 +180,6 @@ var IndexedDbProvider = function (_StorageProvider) {
 					if (cursor) {
 						feedList.push(cursor.value);
 						cursor.continue();
-					} else {
-						resolve(feedList);
 					}
 				};
 			});
@@ -189,8 +191,12 @@ var IndexedDbProvider = function (_StorageProvider) {
 			return new Promise(function (resolve, reject) {
 				var feedItemList = [];
 
-				var feedItems = that.db.transaction("FeedItem").objectStore("FeedItem");
+				var trans = that.db.transaction("FeedItem");
+				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
+				trans.oncomplete = function () {
+					resolve(feedItemList);
+				};
 
 				index.openCursor(IDBKeyRange.only(feedUrl)).onsuccess = function (event) {
 					var cursor = event.target.result;
@@ -198,8 +204,6 @@ var IndexedDbProvider = function (_StorageProvider) {
 					if (cursor) {
 						feedItemList.push(cursor.value);
 						cursor.continue();
-					} else {
-						resolve(feedItemList);
 					}
 				};
 			});
@@ -209,11 +213,12 @@ var IndexedDbProvider = function (_StorageProvider) {
 		value: function saveFeed(feed) {
 			var that = this;
 			return new Promise(function (resolve, reject) {
-				var feedStore = that.db.transaction(["Feed"], "readwrite").objectStore("Feed");
-				var request = feedStore.put(feed);
-				request.onsuccess = function () {
+				var trans = that.db.transaction(["Feed"], "readwrite");
+				trans.oncomplete = function () {
 					return resolve();
 				};
+				var feedStore = trans.objectStore("Feed");
+				var request = feedStore.put(feed);
 			});
 		}
 	}, {
@@ -249,15 +254,13 @@ var IndexedDbProvider = function (_StorageProvider) {
 			var that = this;
 			return new Promise(function (resolve, reject) {
 				var trans = that.db.transaction("FeedItem", "readwrite");
+				trans.oncomplete = function () {
+					return resolve();
+				};
 				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
 
 				var itemKey = null;
-
-				function saveItem() {
-
-					resolve();
-				}
 
 				console.log("SaveFeedItem: " + feedItem.feedUrl);
 				index.openCursor(IDBKeyRange.only(feedItem.feedUrl)).onsuccess = function (event) {
@@ -269,13 +272,11 @@ var IndexedDbProvider = function (_StorageProvider) {
 						} else {
 							cursor.update(feedItem, cursor.key).onsuccess = function () {
 								console.log("Saved item as update: " + feedItem.title);
-								resolve();
 							};
 						}
 					} else {
 						feedItems.put(feedItem).onsuccess = function () {
 							console.log("Saved item in else: " + feedItem.title);
-							resolve();
 						};
 					}
 				};
@@ -286,7 +287,11 @@ var IndexedDbProvider = function (_StorageProvider) {
 		value: function removeFeedItem(feedItem) {
 			var that = this;
 			return new Promise(function (resolve, reject) {
-				var feedItems = that.db.transaction("FeedItem", "readwrite").objectStore("FeedItem");
+				var trans = that.db.transaction("FeedItem", "readwrite");
+				trans.oncomplete = function () {
+					return resolve();
+				};
+				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
 
 				index.openCursor(IDBKeyRange.only(feedUrl)).onsuccess = function (event) {
@@ -295,10 +300,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 					if (cursor) {
 						if (cursor.value.title != feedItem.title) cursor.continue();else {
 							feedItems.delete(cursor.key);
-							resolve();
 						}
-					} else {
-						resolve();
 					}
 				};
 			});
