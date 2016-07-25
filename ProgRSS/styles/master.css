@@ -218,8 +218,10 @@ body {
   margin-right: 16px;
   padding: 4px 2px; }
 
+@media screen and (min-width: 600px) {
+  .control-group {
+    width: 600px; } }
 .control-group {
-  width: 600px;
   display: flex;
   position: relative;
   flex-wrap: wrap; }
