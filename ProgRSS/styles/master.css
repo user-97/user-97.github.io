@@ -119,6 +119,8 @@ header {
     cursor: pointer; }
   .header button:last-child {
     margin-right: 16px; }
+  .header .button:disabled {
+    opacity: 0.3; }
 
 main {
   margin-top: 56px; }
