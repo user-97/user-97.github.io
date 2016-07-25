@@ -119,8 +119,6 @@ header {
     cursor: pointer; }
   .header button:last-child {
     margin-right: 16px; }
-  .header .button:disabled {
-    opacity: 0.3; }
 
 main {
   margin-top: 56px; }
@@ -220,6 +218,9 @@ body {
   margin-right: 16px;
   padding: 4px 2px; }
 
+.button:disabled {
+  opacity: 0.3; }
+
 @media screen and (min-width: 600px) {
   .control-group {
     width: 600px; } }
@@ -240,4 +241,5 @@ body {
 
 .page-add-feed {
   background-color: lightblue; }
+
 
