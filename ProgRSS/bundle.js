@@ -231,8 +231,10 @@ var IndexedDbProvider = function (_StorageProvider) {
 						var cursor = event.target.result;
 
 						if (cursor) {
-							feedItemList.delete(cursor.primaryKey);
-							cursor.continue();
+							var req2 = feedItemList.delete(cursor.primaryKey);
+							req2.onsuccess = function () {
+								cursor.continue();
+							};
 						} else {
 							resolve();
 						}
