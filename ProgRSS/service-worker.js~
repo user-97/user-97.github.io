@@ -13,7 +13,7 @@ self.addEventListener('install', function(e) {
     caches.open(cacheName).then(function(cache) {
       console.log('[ServiceWorker] Caching app shell');
 	  bInstalling = true;
-	  console.log('[ServiceWorker] bInstalling is true');
+	  console.log('[ServiceWorker] bInstalling is true 0');
       return cache.addAll(filesToCache);
     })
   );
