@@ -584,9 +584,10 @@ var PageHomeController = function () {
 								history.pushState({ page: "editFeed", feed: that.feedList[id] }, null, "#editFeed");
 							},
 							removeFeed: function removeFeed(id, event) {
-								that.storageController.removeFeed(that.feedList[id].linkUrl);
-								that.displayPage();
-								event.stopPropagation();
+								that.storageController.removeFeed(that.feedList[id].linkUrl).then(function () {
+									that.displayPage();
+									event.stopPropagation();
+								});
 							},
 							displayFeed: function displayFeed(id) {
 								that.displayPageViewFeed(that.feedList[id]);
@@ -1193,7 +1194,7 @@ var StorageController = function () {
 	}, {
 		key: 'removeFeed',
 		value: function removeFeed(feedLinkUrl) {
-			this.storageProvider.removeFeed(feedLinkUrl);
+			return this.storageProvider.removeFeed(feedLinkUrl);
 		}
 	}, {
 		key: 'saveFeedItem',

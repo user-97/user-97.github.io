@@ -1,4 +1,4 @@
-var cacheName = 'ProgRSS 19';
+var cacheName = 'ProgRSS 20';
 var bInstalling = false;
 
 var filesToCache = [
