@@ -584,9 +584,9 @@ var PageHomeController = function () {
 								history.pushState({ page: "editFeed", feed: that.feedList[id] }, null, "#editFeed");
 							},
 							removeFeed: function removeFeed(id, event) {
+								event.stopPropagation();
 								that.storageController.removeFeed(that.feedList[id].linkUrl).then(function () {
 									that.displayPage();
-									event.stopPropagation();
 								});
 							},
 							displayFeed: function displayFeed(id) {
