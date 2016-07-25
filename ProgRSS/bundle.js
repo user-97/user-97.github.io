@@ -222,6 +222,9 @@ var IndexedDbProvider = function (_StorageProvider) {
 			var that = this;
 			return new Promise(function (resolve, reject) {
 				var trans = that.db.transaction(["Feed", "FeedItem"], "readwrite");
+				trans.oncomplete = function () {
+					resolve();
+				};
 				var request = trans.objectStore("Feed").delete(feedLinkUrl);
 				request.onsuccess = function () {
 					var feedItemList = trans.objectStore("FeedItem");
@@ -235,8 +238,6 @@ var IndexedDbProvider = function (_StorageProvider) {
 							req2.onsuccess = function () {
 								cursor.continue();
 							};
-						} else {
-							resolve();
 						}
 					};
 				};
