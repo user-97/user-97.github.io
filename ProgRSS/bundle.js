@@ -404,8 +404,22 @@ var PageHomeController = function () {
 	_createClass(PageHomeController, [{
 		key: 'open',
 		value: function open(storageController) {
+			var that = this;
 			this.storageController = storageController;
 			this.displayPage();
+			window.addEventListener("popstate", function (e) {
+				if (e.state) {
+					if (e.state.page == "viewFeed") {
+						that.displayPageViewFeed(e.state.feed);
+					} else if (e.state.page == "newFeed") {
+						that.displayPageAddFeed(new _Feed2.default());
+					} else if (e.state.page == "editFeed") {
+						that.displayPageAddFeed(e.state.feed);
+					}
+				} else {
+					that.displayPage();
+				}
+			});
 		}
 	}, {
 		key: 'updateFeed',
@@ -561,17 +575,22 @@ var PageHomeController = function () {
 								});
 							},
 							addFeed: function addFeed() {
-								that.displayPageAddFeed(new _Feed2.default());
+								var newFeed = new _Feed2.default();
+								that.displayPageAddFeed(newFeed);
+								history.pushState({ page: "newFeed", feed: newFeed }, null, "#newFeed");
 							},
 							editFeed: function editFeed(id) {
 								that.displayPageAddFeed(that.feedList[id]);
+								history.pushState({ page: "editFeed", feed: that.feedList[id] }, null, "#editFeed");
 							},
-							removeFeed: function removeFeed(id) {
+							removeFeed: function removeFeed(id, event) {
 								that.storageController.removeFeed(that.feedList[id].linkUrl);
 								that.displayPage();
+								event.stopPropagation();
 							},
 							displayFeed: function displayFeed(id) {
 								that.displayPageViewFeed(that.feedList[id]);
+								history.pushState({ page: "viewFeed", feed: that.feedList[id] }, null, "#viewFeed");
 							},
 							render: function render() {
 								var _this = this;
@@ -642,8 +661,8 @@ var PageHomeController = function () {
 														),
 														_react2.default.createElement(
 															'button',
-															{ className: 'button-remove', 'data-id': elem.linkUrl, 'aria-label': 'Remove', onClick: function onClick() {
-																	return _this.removeFeed(i);
+															{ className: 'button-remove', 'data-id': elem.linkUrl, 'aria-label': 'Remove', onClick: function onClick(event) {
+																	return _this.removeFeed(i, event);
 																} },
 															'Remove'
 														)
@@ -679,7 +698,7 @@ var PageHomeController = function () {
 						that.displayPageViewFeed(feed);
 					},
 					back: function back() {
-						that.displayPage();
+						history.back();
 					},
 					refresh: function refresh() {
 						that.updateFeed(feed).then(function () {
@@ -765,7 +784,7 @@ var PageHomeController = function () {
 			var PageSettings = _react2.default.createClass({
 				displayName: 'PageSettings',
 				back: function back() {
-					that.displayPage();
+					history.back();
 				},
 				render: function render() {
 					return _react2.default.createElement(
@@ -874,9 +893,10 @@ var PageHomeController = function () {
 				saveFeed: function saveFeed() {
 					that.storageController.saveFeed(this.state.feed);
 					that.displayPage();
+					history.pushState(null, null, "index.html");
 				},
 				back: function back() {
-					that.displayPage();
+					history.back();
 				},
 				render: function render() {
 					return _react2.default.createElement(
@@ -954,7 +974,7 @@ var PageHomeController = function () {
 									_react2.default.createElement('input', { type: 'radio', name: 'rbProxy', value: 'No', checked: !this.state.feed.useProxy, onChange: this.setFeedUseProxy }),
 									_react2.default.createElement(
 										'button',
-										{ id: 'bnTest', onClick: this.test },
+										{ className: 'button', id: 'bnTest', onClick: this.test },
 										'Test'
 									)
 								)
@@ -974,7 +994,7 @@ var PageHomeController = function () {
 								{ className: 'control-group' },
 								_react2.default.createElement(
 									'button',
-									{ className: 'align-right', id: 'bnSave', disabled: !this.state.tested, onClick: this.saveFeed },
+									{ className: 'button align-right', id: 'bnSave', disabled: !this.state.tested, onClick: this.saveFeed },
 									'Save'
 								)
 							)

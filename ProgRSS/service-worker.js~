@@ -1,4 +1,5 @@
-var cacheName = 'ProgRSS 8';
+var cacheName = 'ProgRSS 9';
+var bInstalling = false;
 
 var filesToCache = [
   '/ProgRSS/index.html',
@@ -11,6 +12,7 @@ self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(cacheName).then(function(cache) {
       console.log('[ServiceWorker] Caching app shell');
+	  bInstalling = true;
       return cache.addAll(filesToCache);
     })
   );
@@ -33,12 +35,16 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
 	console.log('[ServiceWorker] Fetch', e.request.url);
   
-	e.respondWith(
-	  caches.match(e.request).then(function(response) {
-		return response || fetch(e.request);
-	  })
-	);
-  
+	if (!bInstalling) {
+		e.respondWith(
+		  caches.match(e.request).then(function(response) {
+			return response || fetch(e.request);
+		  })
+		);
+	}
+	else {
+		e.respondWith(fetch(e.request));
+	}
 });
 
 

@@ -189,6 +189,9 @@ body {
 @media screen and (min-width: 501px) and (max-width: 800px) {
   .feed-item {
     width: 46%; } }
+@media screen and (max-width: 600px) {
+  .control-group {
+    width: 100%; } }
 .button {
   border: 1px solid #3b3b3b;
   border-radius: 4px;
@@ -218,7 +221,8 @@ body {
 .control-group {
   width: 600px;
   display: flex;
-  position: relative; }
+  position: relative;
+  flex-wrap: wrap; }
 
 .control-group input {
   right: 0px; }
