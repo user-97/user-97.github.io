@@ -215,7 +215,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 			return new Promise(function (resolve, reject) {
 				var trans = that.db.transaction(["Feed"], "readwrite");
 				trans.oncomplete = function () {
-					return resolve();
+					resolve();
 				};
 				var feedStore = trans.objectStore("Feed");
 				var request = feedStore.put(feed);
@@ -255,7 +255,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 			return new Promise(function (resolve, reject) {
 				var trans = that.db.transaction("FeedItem", "readwrite");
 				trans.oncomplete = function () {
-					return resolve();
+					resolve();
 				};
 				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
@@ -289,7 +289,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 			return new Promise(function (resolve, reject) {
 				var trans = that.db.transaction("FeedItem", "readwrite");
 				trans.oncomplete = function () {
-					return resolve();
+					resolve();
 				};
 				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
