@@ -1,4 +1,4 @@
-var cacheName = 'ProgRSS 12';
+var cacheName = 'ProgRSS 13';
 var bInstalling = false;
 
 var filesToCache = [
@@ -13,6 +13,7 @@ self.addEventListener('install', function(e) {
     caches.open(cacheName).then(function(cache) {
       console.log('[ServiceWorker] Caching app shell');
 	  bInstalling = true;
+	  console.log('[ServiceWorker] bInstalling is true');
       return cache.addAll(filesToCache);
     })
   );

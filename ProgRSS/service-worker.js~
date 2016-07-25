@@ -1,4 +1,4 @@
-var cacheName = 'ProgRSS 11';
+var cacheName = 'ProgRSS 12';
 var bInstalling = false;
 
 var filesToCache = [
@@ -43,6 +43,7 @@ self.addEventListener('fetch', function(e) {
 		);
 	}
 	else {
+		console.log('[ServiceWorker] Fetch while installing');
 		e.respondWith(fetch(e.request));
 	}
 });
