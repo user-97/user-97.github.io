@@ -94,6 +94,19 @@ blockquote, q {
   stroke-width: 5px;
   animation: rotate linear 2.5s infinite; }
 
+.help {
+  width: 30px;
+  height: 30px;
+  background-color: #6af9a3;
+  border: 1px solid black;
+  text-align: center;
+  vertical-align: middle;
+  display: inline-flex;
+  border-radius: 5px;
+  padding: 7px 8px 8px 10px;
+  position: absolute;
+  right: 0px; }
+
 /* __3__1 Headers */
 header {
   background-color: lightblue;
@@ -129,15 +142,29 @@ main {
 body {
   height: 100%; }
 
+.modal-dialog > div {
+  position: fixed;
+  left: 13%;
+  top: 30%;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 10px; }
+
 /* __4__ Typography */
+strong {
+  font-style: italic; }
+
 /* __5__ Links */
 /* __6__ Lists, images, etc. */
 #view-feed > main {
   display: flex;
   flex-wrap: wrap; }
 
+.feed-suspended {
+  opacity: 0.5; }
+
 .feeds, .cached-attempts {
-  background-color: lightgreen;
   margin-bottom: 10px; }
 
 .feeds > li, .cached-attempts > li {
@@ -218,8 +245,20 @@ body {
   margin-right: 16px;
   padding: 4px 2px; }
 
+.button-suspend {
+  border: 1px solid #5f0707;
+  border-radius: 4px;
+  background-color: #f97070;
+  color: white;
+  padding: 4px 2px;
+  margin-right: 16px;
+  padding: 4px 2px; }
+
 .button:disabled {
   opacity: 0.3; }
+
+.button-off {
+  opacity: 0.5; }
 
 @media screen and (min-width: 600px) {
   .control-group {
@@ -241,5 +280,4 @@ body {
 
 .page-add-feed {
   background-color: lightblue; }
-
 
