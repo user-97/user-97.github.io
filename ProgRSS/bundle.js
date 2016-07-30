@@ -1412,6 +1412,10 @@ var _PageControllerFactory = require('./PageControllerFactory.js');
 
 var _PageControllerFactory2 = _interopRequireDefault(_PageControllerFactory);
 
+var _Feed = require('./Feed.js');
+
+var _Feed2 = _interopRequireDefault(_Feed);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 if (!Array.prototype.findIndex) {
@@ -1481,7 +1485,7 @@ app.start = function (storageController, pageControllerFactory, bFirstInstall) {
 
 app.addClimateFeed = function () {
 	return new Promise(function (resolve, reject) {
-		feed = new Feed();
+		feed = new _Feed2.default();
 		feed.name = "Climate Dashboard";
 		feed.linkUrl = "http://climatedash.nz/rss/changes.php";
 		app.storageController.saveFeed(feed).then(function () {
@@ -1516,7 +1520,7 @@ if ('serviceWorker' in navigator) {
 	});
 }
 
-},{"./IndexedDbProvider.js":3,"./PageControllerFactory.js":4,"./StorageController.js":8}],11:[function(require,module,exports){
+},{"./Feed.js":1,"./IndexedDbProvider.js":3,"./PageControllerFactory.js":4,"./StorageController.js":8}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
