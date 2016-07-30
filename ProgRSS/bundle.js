@@ -18,7 +18,9 @@ var Feed = function () {
 		this.numUnread = 0;
 		this.numChars = 200;
 		this.useProxy = false;
-		this.numItems = 200;
+		this.numDays = 200;
+		this.isSuspended = false;
+		this.numNew = 0;
 	}
 
 	_createClass(Feed, [{
@@ -27,7 +29,7 @@ var Feed = function () {
 	}, {
 		key: 'getStorageState',
 		value: function getStorageState() {
-			return { "name": this.name, "linkUrl": this.linkUrl, "numUnread": this.numUnread, "numChars": this.numChars, "useProxy": this.useProxy, "numItems": this.numItems };
+			return { "name": this.name, "linkUrl": this.linkUrl, "numUnread": this.numUnread, "numChars": this.numChars, "useProxy": this.useProxy, "numDays": this.numDays, "isSuspended": this.isSuspended, "numNew": this.numNew };
 		}
 	}, {
 		key: 'setFromStorageState',
@@ -41,7 +43,17 @@ var Feed = function () {
 				this.numChars = 200;
 			}
 			this.useProxy = obj.useProxy;
-			this.numItems = obj.numItems;
+			if (typeof obj.numDays != "undefined") {
+				this.numDays = obj.numDays;
+			} else {
+				this.numDays = 200;
+			}
+			this.isSuspended = obj.isSuspended;
+			if (typeof obj.numNew != "undefined") {
+				this.numNew = obj.numNew;
+			} else {
+				this.numNew = 0;
+			}
 		}
 	}]);
 
@@ -136,6 +148,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 		value: function isReady() {
 			var that = this;
 			return new Promise(function (resolve, reject) {
+				var bFirstInstall = false;
 				var request = window.indexedDB.open("ProgRSSDatabase", 5);
 				request.onerror = function (event) {
 					alert("Error: Failed to open database.");
@@ -143,7 +156,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 				};
 				request.onsuccess = function (event) {
 					that.db = event.target.result;
-					resolve();
+					resolve(bFirstInstall);
 				};
 				request.onupgradeneeded = function (event) {
 					var db = event.target.result;
@@ -153,6 +166,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 						var objectStore2 = db.createObjectStore("FeedItem", { autoIncrement: true });
 						objectStore2.createIndex("feedUrl", "feedUrl", { unique: false });
 						objectStore2.createIndex("title", "title", { unique: false });
+						bFirstInstall = true;
 					} else if (event.oldVersion == 4) {
 						var objectStore2 = event.currentTarget.transaction.objectStore("FeedItem");
 						objectStore2.deleteIndex("feedUrl");
@@ -253,9 +267,10 @@ var IndexedDbProvider = function (_StorageProvider) {
 		value: function saveFeedItem(feedItem) {
 			var that = this;
 			return new Promise(function (resolve, reject) {
+				var bIsNew = false;
 				var trans = that.db.transaction("FeedItem", "readwrite");
 				trans.oncomplete = function () {
-					resolve();
+					resolve(bIsNew);
 				};
 				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
@@ -276,6 +291,7 @@ var IndexedDbProvider = function (_StorageProvider) {
 						}
 					} else {
 						feedItems.put(feedItem).onsuccess = function () {
+							bIsNew = true;
 							console.log("Saved item in else: " + feedItem.title);
 						};
 					}
@@ -294,12 +310,12 @@ var IndexedDbProvider = function (_StorageProvider) {
 				var feedItems = trans.objectStore("FeedItem");
 				var index = feedItems.index("feedUrl");
 
-				index.openCursor(IDBKeyRange.only(feedUrl)).onsuccess = function (event) {
+				index.openCursor(IDBKeyRange.only(feedItem.feedUrl)).onsuccess = function (event) {
 					var cursor = event.target.result;
 
 					if (cursor) {
 						if (cursor.value.title != feedItem.title) cursor.continue();else {
-							feedItems.delete(cursor.key);
+							feedItems.delete(cursor.primaryKey);
 						}
 					}
 				};
@@ -431,78 +447,110 @@ var PageHomeController = function () {
 		value: function updateFeed(feed) {
 			var that = this;
 			return new Promise(function (resolve, reject) {
-				(0, _utils.getXml)(feed.linkUrl, feed.useProxy).then(function (response) {
-					var obj = (0, _utils.xmlToJson)(response);
+				if (feed.isSuspended) resolve();else {
+					(0, _utils.getXml)(feed.linkUrl, feed.useProxy).then(function (response) {
+						var obj = (0, _utils.xmlToJson)(response);
 
-					if (feed.useProxy) {
-						obj = obj.query.results;
-					} else {
-						obj = obj.rss.channel;
-					}
-
-					that.storageController.loadFeedItemList(feed.linkUrl).then(function (feedItemList) {
-						var promises = [];
-
-						function addFeedItem(item) {
-							var feedItem = feedItemList.find(function (elem) {
-								return elem.feedUrl == feed.linkUrl && elem.title == item.title["#text"];
-							});
-							if (!feedItem) {
-								feedItem = new _FeedItem2.default();
-							}
-							feedItem.feedUrl = feed.linkUrl;
-							feedItem.title = item.title["#text"] || item.title["#cdata-section"];
-							feedItem.description = item.description["#text"] || item.description["#cdata-section"];
-							feedItem.itemUrl = item.link["#text"] || item.link["#cdata-section"];
-							if (typeof item.pubDate != "undefined") {
-								if (item.pubDate["#text"]) feedItem.date = new Date(item.pubDate["#text"]);else feedItem.date = new Date(item.pubDate["#cdata-section"]);
-							} else if (typeof item["dc:date"] != "undefined") {
-								if (item["dc:date"]["#text"]) feedItem.date = new Date(item["dc:date"]["#text"]);else feedItem.date = new Date(item["dc:date"]["#cdata-section"]);
-							}
-							promises.push(that.storageController.saveFeedItem(feedItem));
+						if (feed.useProxy) {
+							obj = obj.query.results;
+						} else {
+							obj = obj.rss.channel;
 						}
-						if (typeof obj.item.push != "undefined") {
-							var item;
-							var _iteratorNormalCompletion = true;
-							var _didIteratorError = false;
-							var _iteratorError = undefined;
+
+						that.storageController.loadFeedItemList(feed.linkUrl).then(function (feedItemList) {
+							var promises = [];
+							var compare = new Date();
+							compare.setTime(compare.getTime() - feed.numDays * 86400000);
+
+							function addFeedItem(item) {
+								var feedItem = feedItemList.find(function (elem) {
+									return elem.feedUrl == feed.linkUrl && elem.title == item.title["#text"];
+								});
+								if (!feedItem) {
+									feedItem = new _FeedItem2.default();
+								}
+								feedItem.feedUrl = feed.linkUrl;
+								feedItem.title = item.title["#text"] || item.title["#cdata-section"];
+								feedItem.description = item.description["#text"] || item.description["#cdata-section"];
+								feedItem.itemUrl = item.link["#text"] || item.link["#cdata-section"];
+								if (typeof item.pubDate != "undefined") {
+									if (item.pubDate["#text"]) feedItem.date = new Date(item.pubDate["#text"]);else feedItem.date = new Date(item.pubDate["#cdata-section"]);
+								} else if (typeof item["dc:date"] != "undefined") {
+									if (item["dc:date"]["#text"]) feedItem.date = new Date(item["dc:date"]["#text"]);else feedItem.date = new Date(item["dc:date"]["#cdata-section"]);
+								}
+								if (feedItem.date >= compare) promises.push(that.storageController.saveFeedItem(feedItem).then(function (isNew) {
+									if (isNew) feed.numNew += 1;
+								}));
+							}
+							if (typeof obj.item.push != "undefined") {
+								var item;
+								var _iteratorNormalCompletion = true;
+								var _didIteratorError = false;
+								var _iteratorError = undefined;
+
+								try {
+									for (var _iterator = obj.item[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+										item = _step.value;
+
+										addFeedItem(item);
+									}
+								} catch (err) {
+									_didIteratorError = true;
+									_iteratorError = err;
+								} finally {
+									try {
+										if (!_iteratorNormalCompletion && _iterator.return) {
+											_iterator.return();
+										}
+									} finally {
+										if (_didIteratorError) {
+											throw _iteratorError;
+										}
+									}
+								}
+							} else {
+								addFeedItem(obj.item);
+							}
+
+							var removeList = feedItemList.filter(function (elem) {
+								return elem.date < compare;
+							});
+							var _iteratorNormalCompletion2 = true;
+							var _didIteratorError2 = false;
+							var _iteratorError2 = undefined;
 
 							try {
-								for (var _iterator = obj.item[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-									item = _step.value;
+								for (var _iterator2 = removeList[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+									var removeItem = _step2.value;
 
-									addFeedItem(item);
+									promises.push(that.storageController.removeFeedItem(removeItem));
 								}
 							} catch (err) {
-								_didIteratorError = true;
-								_iteratorError = err;
+								_didIteratorError2 = true;
+								_iteratorError2 = err;
 							} finally {
 								try {
-									if (!_iteratorNormalCompletion && _iterator.return) {
-										_iterator.return();
+									if (!_iteratorNormalCompletion2 && _iterator2.return) {
+										_iterator2.return();
 									}
 								} finally {
-									if (_didIteratorError) {
-										throw _iteratorError;
+									if (_didIteratorError2) {
+										throw _iteratorError2;
 									}
 								}
 							}
-						} else {
-							addFeedItem(obj.item);
-						}
 
-						/*for (var i = feedItemList.length - 1; i >= feed.numItems; i--) {
-      	promises.push(that.storageController.removeFeedItem(feedItemList[i]));
-      }*/
-
-						Promise.all(promises).then(function () {
-							resolve();
+							Promise.all(promises).then(function () {
+								that.storageController.saveFeed(feed).then(function () {
+									resolve();
+								});
+							});
 						});
+					}, function (error) {
+						console.error("Failed!", error);
+						reject(Error(error));
 					});
-				}, function (error) {
-					console.error("Failed!", error);
-					reject(Error(error));
-				});
+				}
 			});
 		}
 	}, {
@@ -517,29 +565,29 @@ var PageHomeController = function () {
 				that.storageController.loadFeedItemList(feedUrl).then(function (feedItemList) {
 					console.log("updateUnreadCount - loaded feed item list");
 					var count = 0;
-					var _iteratorNormalCompletion2 = true;
-					var _didIteratorError2 = false;
-					var _iteratorError2 = undefined;
+					var _iteratorNormalCompletion3 = true;
+					var _didIteratorError3 = false;
+					var _iteratorError3 = undefined;
 
 					try {
-						for (var _iterator2 = feedItemList[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-							var item = _step2.value;
+						for (var _iterator3 = feedItemList[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+							var item = _step3.value;
 
 							if (!item.haveRead) {
 								count += 1;
 							}
 						}
 					} catch (err) {
-						_didIteratorError2 = true;
-						_iteratorError2 = err;
+						_didIteratorError3 = true;
+						_iteratorError3 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion2 && _iterator2.return) {
-								_iterator2.return();
+							if (!_iteratorNormalCompletion3 && _iterator3.return) {
+								_iterator3.return();
 							}
 						} finally {
-							if (_didIteratorError2) {
-								throw _iteratorError2;
+							if (_didIteratorError3) {
+								throw _iteratorError3;
 							}
 						}
 					}
@@ -570,6 +618,35 @@ var PageHomeController = function () {
 						that.feedList = feedList;
 						var pageHolder = document.getElementById('page-holder');
 
+						var ModalDialog = _react2.default.createClass({
+							displayName: 'ModalDialog',
+							render: function render() {
+								return _react2.default.createElement(
+									'div',
+									{ className: 'modal-dialog' },
+									_react2.default.createElement(
+										'div',
+										null,
+										_react2.default.createElement(
+											'label',
+											null,
+											this.props.text
+										),
+										_react2.default.createElement(
+											'button',
+											{ className: 'button', onClick: this.props.onYes },
+											'Yes'
+										),
+										_react2.default.createElement(
+											'button',
+											{ className: 'button', onClick: this.props.onNo },
+											'No'
+										)
+									)
+								);
+							}
+						});
+
 						var PageHome = _react2.default.createClass({
 							displayName: 'PageHome',
 							updateAllFeeds: function updateAllFeeds() {
@@ -590,9 +667,14 @@ var PageHomeController = function () {
 							},
 							removeFeed: function removeFeed(id, event) {
 								event.stopPropagation();
-								that.storageController.removeFeed(that.feedList[id].linkUrl).then(function () {
-									that.displayPage();
-								});
+								(0, _reactDom.render)(_react2.default.createElement(ModalDialog, { text: "Remove " + that.feedList[id].name + "?", onYes: function onYes() {
+										that.storageController.removeFeed(that.feedList[id].linkUrl).then(function () {
+											that.displayPage();
+										});
+									}, onNo: function onNo() {
+										document.getElementById('dialog').setAttribute('hidden', 'true');
+									} }), document.getElementById('dialog'));
+								document.getElementById('dialog').removeAttribute('hidden');
 							},
 							displayFeed: function displayFeed(id) {
 								that.displayPageViewFeed(that.feedList[id]);
@@ -644,7 +726,7 @@ var PageHomeController = function () {
 												this.props.feeds.map(function (elem, i) {
 													return _react2.default.createElement(
 														'li',
-														{ key: i, onClick: function onClick() {
+														{ key: i, className: elem.isSuspended ? 'feed-suspended' : '', onClick: function onClick() {
 																return _this.displayFeed(i);
 															} },
 														_react2.default.createElement(
@@ -655,7 +737,12 @@ var PageHomeController = function () {
 															_react2.default.createElement(
 																'span',
 																null,
-																elem.numUnread
+																_react2.default.createElement(
+																	'strong',
+																	null,
+																	elem.numNew,
+																	' New'
+																)
 															)
 														),
 														_react2.default.createElement(
@@ -674,7 +761,8 @@ var PageHomeController = function () {
 														)
 													);
 												})
-											)
+											),
+											_react2.default.createElement('div', { id: 'dialog' })
 										)
 									)
 								);
@@ -707,6 +795,7 @@ var PageHomeController = function () {
 						history.back();
 					},
 					refresh: function refresh() {
+						document.querySelector('.loader').removeAttribute("hidden");
 						that.updateFeed(feed).then(function () {
 							return that.displayPageViewFeed(feed);
 						});
@@ -780,6 +869,9 @@ var PageHomeController = function () {
 				});
 				(0, _reactDom.render)(_react2.default.createElement(PageViewFeed, { feedName: feed.name, feedNumChars: feed.numChars, feedItemList: that.feedItemList }), pageHolder1);
 				document.body.className = "page";
+				document.querySelector('.loader').setAttribute("hidden", "true");
+				feed.numNew = 0;
+				that.storageController.saveFeed(feed);
 			});
 		}
 	}, {
@@ -877,9 +969,9 @@ var PageHomeController = function () {
 
 					this.setState({ feed: temp, tested: false });
 				},
-				setFeedNumItems: function setFeedNumItems(event) {
+				setFeedNumDays: function setFeedNumDays(event) {
 					var temp = this.state.feed;
-					temp.numItems = event.target.value;
+					temp.numDays = event.target.value;
 					this.setState({ feed: temp });
 				},
 				test: function test() {
@@ -896,6 +988,16 @@ var PageHomeController = function () {
 						document.querySelector(".loader").setAttribute("hidden", "true");
 					});
 				},
+				suspend: function suspend() {
+					var temp = this.state.feed;
+					temp.isSuspended = true;
+					this.setState({ feed: temp });
+				},
+				active: function active() {
+					var temp = this.state.feed;
+					temp.isSuspended = false;
+					this.setState({ feed: temp });
+				},
 				saveFeed: function saveFeed() {
 					that.storageController.saveFeed(this.state.feed);
 					that.displayPage();
@@ -905,6 +1007,7 @@ var PageHomeController = function () {
 					history.back();
 				},
 				render: function render() {
+					var suspendedClass = this.state.feed.isSuspended;
 					return _react2.default.createElement(
 						'div',
 						{ className: 'page' },
@@ -982,6 +1085,35 @@ var PageHomeController = function () {
 										'button',
 										{ className: 'button', id: 'bnTest', onClick: this.test },
 										'Test'
+									),
+									_react2.default.createElement(
+										'div',
+										{ className: 'help', title: 'Using a proxy will use the Yahoo Query Language web service, which is more likely to work due to not requiring the RSS feed to specify CORS headers; however, not using a proxy offers more privacy as your browser directly connects to the RSS feed rather than requesting all feeds via a single service.' },
+										'?'
+									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'control-group' },
+								_react2.default.createElement('span', null),
+								_react2.default.createElement(
+									'span',
+									null,
+									_react2.default.createElement(
+										'button',
+										{ className: this.state.feed.isSuspended ? 'button-suspend' : 'button-suspend button-off', id: 'bnSuspend', onClick: this.suspend },
+										'Suspend'
+									),
+									_react2.default.createElement(
+										'button',
+										{ className: this.state.feed.isSuspended ? 'button button-off' : 'button', id: 'bnActive', onClick: this.active },
+										'Active'
+									),
+									_react2.default.createElement(
+										'div',
+										{ className: 'help', title: 'Suspending a feed will mean the feed does not update/refresh.' },
+										'?'
 									)
 								)
 							),
@@ -990,10 +1122,10 @@ var PageHomeController = function () {
 								{ className: 'control-group' },
 								_react2.default.createElement(
 									'label',
-									{ 'for': 'teNumItems' },
+									{ 'for': 'teNumDays' },
 									'Delete items older than # days:'
 								),
-								_react2.default.createElement('input', { type: 'text', id: 'teNumItems', onChange: this.setFeedNumItems, value: this.state.feed.numItems })
+								_react2.default.createElement('input', { type: 'text', id: 'teNumDays', onChange: this.setFeedNumDays, value: this.state.feed.numDays })
 							),
 							_react2.default.createElement(
 								'div',
@@ -1336,11 +1468,26 @@ var app = {
 	spinner: document.querySelector('.loader')
 };
 
-app.start = function (storageController, pageControllerFactory) {
+app.start = function (storageController, pageControllerFactory, bFirstInstall) {
 	app.storageController = storageController;
 	app.pageControllerFactory = pageControllerFactory;
 	app.storageController.loadSettings(app.options);
-	app.openHome();
+	if (bFirstInstall) app.addClimateFeed().then(function () {
+		return app.openHome();
+	});else {
+		app.openHome();
+	}
+};
+
+app.addClimateFeed = function () {
+	return new Promise(function (resolve, reject) {
+		feed = new Feed();
+		feed.name = "Climate Dashboard";
+		feed.linkUrl = "http://climatedash.nz/rss/changes.php";
+		app.storageController.saveFeed(feed).then(function () {
+			resolve();
+		});
+	});
 };
 
 app.openHome = function () {
@@ -1359,8 +1506,8 @@ app.openViewFeed = function () {
 });*/
 
 var testDb = new _IndexedDbProvider2.default();
-testDb.isReady().then(function () {
-	app.start(new _StorageController2.default(testDb), new _PageControllerFactory2.default());
+testDb.isReady().then(function (bFirstInstall) {
+	app.start(new _StorageController2.default(testDb), new _PageControllerFactory2.default(), bFirstInstall);
 });
 
 if ('serviceWorker' in navigator) {
