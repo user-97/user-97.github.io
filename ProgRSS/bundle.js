@@ -453,11 +453,11 @@ var PageHomeController = function () {
 							feedItem.feedUrl = feed.linkUrl;
 							feedItem.title = item.title["#text"] || item.title["#cdata-section"];
 							feedItem.description = item.description["#text"] || item.description["#cdata-section"];
-							feedItem.itemUrl = item.link["#text"];
+							feedItem.itemUrl = item.link["#text"] || item.link["#cdata-section"];
 							if (typeof item.pubDate != "undefined") {
-								feedItem.date = new Date(item.pubDate["#text"]);
+								if (item.pubDate["#text"]) feedItem.date = new Date(item.pubDate["#text"]);else feedItem.date = new Date(item.pubDate["#cdata-section"]);
 							} else if (typeof item["dc:date"] != "undefined") {
-								feedItem.date = new Date(item["dc:date"]["#text"]);
+								if (item["dc:date"]["#text"]) feedItem.date = new Date(item["dc:date"]["#text"]);else feedItem.date = new Date(item["dc:date"]["#cdata-section"]);
 							}
 							promises.push(that.storageController.saveFeedItem(feedItem));
 						}
