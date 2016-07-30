@@ -1485,7 +1485,7 @@ app.start = function (storageController, pageControllerFactory, bFirstInstall) {
 
 app.addClimateFeed = function () {
 	return new Promise(function (resolve, reject) {
-		feed = new _Feed2.default();
+		var feed = new _Feed2.default();
 		feed.name = "Climate Dashboard";
 		feed.linkUrl = "http://climatedash.nz/rss/changes.php";
 		app.storageController.saveFeed(feed).then(function () {
