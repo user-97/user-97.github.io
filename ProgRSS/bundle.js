@@ -988,6 +988,9 @@ var PageHomeController = function () {
 						document.querySelector(".loader").setAttribute("hidden", "true");
 					});
 				},
+				displayTooltip: function displayTooltip(text) {
+					alert(document.getElementById(text).title);
+				},
 				suspend: function suspend() {
 					var temp = this.state.feed;
 					temp.isSuspended = true;
@@ -1007,6 +1010,8 @@ var PageHomeController = function () {
 					history.back();
 				},
 				render: function render() {
+					var _this4 = this;
+
 					var suspendedClass = this.state.feed.isSuspended;
 					return _react2.default.createElement(
 						'div',
@@ -1088,7 +1093,9 @@ var PageHomeController = function () {
 									),
 									_react2.default.createElement(
 										'div',
-										{ className: 'help', title: 'Using a proxy will use the Yahoo Query Language web service, which is more likely to work due to not requiring the RSS feed to specify CORS headers; however, not using a proxy offers more privacy as your browser directly connects to the RSS feed rather than requesting all feeds via a single service.' },
+										{ id: 'helpProxy', className: 'help', title: 'Using a proxy will use the Yahoo Query Language web service, which is more likely to work due to not requiring the RSS feed to specify CORS headers; however, not using a proxy offers more privacy as your browser directly connects to the RSS feed rather than requesting all feeds via a single service.', onClick: function onClick() {
+												_this4.displayTooltip("helpProxy");
+											} },
 										'?'
 									)
 								)
@@ -1112,7 +1119,9 @@ var PageHomeController = function () {
 									),
 									_react2.default.createElement(
 										'div',
-										{ className: 'help', title: 'Suspending a feed will mean the feed does not update/refresh.' },
+										{ id: 'helpSuspend', className: 'help', title: 'Suspending a feed will mean the feed does not update/refresh.', onClick: function onClick() {
+												_this4.displayTooltip("helpSuspend");
+											} },
 										'?'
 									)
 								)

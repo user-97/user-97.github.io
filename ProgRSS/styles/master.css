@@ -95,15 +95,13 @@ blockquote, q {
   animation: rotate linear 2.5s infinite; }
 
 .help {
-  width: 30px;
-  height: 30px;
   background-color: #6af9a3;
   border: 1px solid black;
   text-align: center;
   vertical-align: middle;
   display: inline-flex;
   border-radius: 5px;
-  padding: 7px 8px 8px 10px;
+  padding: 6px;
   position: absolute;
   right: 0px; }
 
