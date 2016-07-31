@@ -473,6 +473,9 @@ var PageHomeController = function () {
 								feedItem.title = item.title["#text"] || item.title["#cdata-section"];
 								feedItem.description = item.description["#text"] || item.description["#cdata-section"];
 								feedItem.itemUrl = item.link["#text"] || item.link["#cdata-section"];
+								if (typeof feedItem.title == "undefined") feedItem.title = "";
+								if (typeof feedItem.description == "undefined") feedItem.description = "";
+								if (typeof feedItem.itemUrl == "undefined") feedItem.itemUrl = "";
 								if (typeof item.pubDate != "undefined") {
 									if (item.pubDate["#text"]) feedItem.date = new Date(item.pubDate["#text"]);else feedItem.date = new Date(item.pubDate["#cdata-section"]);
 								} else if (typeof item["dc:date"] != "undefined") {
