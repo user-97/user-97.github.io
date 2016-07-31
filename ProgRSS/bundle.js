@@ -1097,7 +1097,7 @@ var PageHomeController = function () {
 									),
 									_react2.default.createElement(
 										'div',
-										{ id: 'helpProxy', className: 'help', title: 'Using a proxy will use the Yahoo Query Language web service, which is more likely to work due to not requiring the RSS feed to specify CORS headers; however, not using a proxy offers more privacy as your browser directly connects to the RSS feed rather than requesting all feeds via a single service.', onClick: function onClick() {
+										{ id: 'helpProxy', className: 'help', title: 'Using a proxy will use the Yahoo Query Language web service, which is more likely to work due to not requiring the RSS feed to be served over https and specify CORS headers; however, not using a proxy offers more privacy as your browser directly connects to the RSS feed rather than requesting all feeds via a single service.', onClick: function onClick() {
 												_this4.displayTooltip("helpProxy");
 											} },
 										'?'
