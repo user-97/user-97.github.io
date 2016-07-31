@@ -1005,9 +1005,10 @@ var PageHomeController = function () {
 					this.setState({ feed: temp });
 				},
 				saveFeed: function saveFeed() {
-					that.storageController.saveFeed(this.state.feed);
-					that.displayPage();
-					history.pushState(null, null, "index.html");
+					that.storageController.saveFeed(this.state.feed).then(function () {
+						that.displayPage();
+						history.pushState(null, null, "index.html");
+					});
 				},
 				back: function back() {
 					history.back();
@@ -1500,6 +1501,7 @@ app.addClimateFeed = function () {
 		var feed = new _Feed2.default();
 		feed.name = "Climate Dashboard";
 		feed.linkUrl = "http://climatedash.nz/rss/changes.php";
+		feed.useProxy = true;
 		app.storageController.saveFeed(feed).then(function () {
 			resolve();
 		});
