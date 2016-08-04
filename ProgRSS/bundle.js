@@ -273,19 +273,19 @@ var IndexedDbProvider = function (_StorageProvider) {
 					resolve(bIsNew);
 				};
 				var feedItems = trans.objectStore("FeedItem");
-				var index = feedItems.index("feedUrl");
+				var index = feedItems.index("title");
 
 				var itemKey = null;
 
 				console.log("SaveFeedItem: " + feedItem.feedUrl);
-				index.openCursor(IDBKeyRange.only(feedItem.feedUrl)).onsuccess = function (event) {
+				index.openCursor(IDBKeyRange.only(feedItem.title)).onsuccess = function (event) {
 					var cursor = event.target.result;
 
 					if (cursor) {
-						if (cursor.value.title != feedItem.title) {
+						if (cursor.value.feedUrl != feedItem.feedUrl) {
 							cursor.continue();
 						} else {
-							cursor.update(feedItem, cursor.key).onsuccess = function () {
+							cursor.update(feedItem).onsuccess = function () {
 								console.log("Saved item as update: " + feedItem.title);
 							};
 						}
@@ -611,172 +611,162 @@ var PageHomeController = function () {
 			this.storageController.loadFeedList().then(function (feedList) {
 				that.feedList = feedList;
 
-				var promises = that.feedList.map(function (feed) {
-					return feed.linkUrl;
-				}).map(that.updateUnreadCount, that);
-				Promise.all(promises).then(function () {
-					console.log("displayPage - updated all feed unread counts");
+				var pageHolder = document.getElementById('page-holder');
 
-					that.storageController.loadFeedList().then(function (feedList) {
-						that.feedList = feedList;
-						var pageHolder = document.getElementById('page-holder');
+				var ModalDialog = _react2.default.createClass({
+					displayName: 'ModalDialog',
+					render: function render() {
+						return _react2.default.createElement(
+							'div',
+							{ className: 'modal-dialog' },
+							_react2.default.createElement(
+								'div',
+								null,
+								_react2.default.createElement(
+									'label',
+									null,
+									this.props.text
+								),
+								_react2.default.createElement(
+									'button',
+									{ className: 'button', onClick: this.props.onYes },
+									'Yes'
+								),
+								_react2.default.createElement(
+									'button',
+									{ className: 'button', onClick: this.props.onNo },
+									'No'
+								)
+							)
+						);
+					}
+				});
 
-						var ModalDialog = _react2.default.createClass({
-							displayName: 'ModalDialog',
-							render: function render() {
-								return _react2.default.createElement(
-									'div',
-									{ className: 'modal-dialog' },
-									_react2.default.createElement(
-										'div',
-										null,
-										_react2.default.createElement(
-											'label',
-											null,
-											this.props.text
-										),
-										_react2.default.createElement(
-											'button',
-											{ className: 'button', onClick: this.props.onYes },
-											'Yes'
-										),
-										_react2.default.createElement(
-											'button',
-											{ className: 'button', onClick: this.props.onNo },
-											'No'
-										)
-									)
-								);
-							}
+				var PageHome = _react2.default.createClass({
+					displayName: 'PageHome',
+					updateAllFeeds: function updateAllFeeds() {
+						document.querySelector('.loader').removeAttribute("hidden");
+						var feed;
+						Promise.all(that.feedList.map(that.updateFeed, that)).then(function () {
+							that.displayPage();
 						});
-
-						var PageHome = _react2.default.createClass({
-							displayName: 'PageHome',
-							updateAllFeeds: function updateAllFeeds() {
-								document.querySelector('.loader').removeAttribute("hidden");
-								var feed;
-								Promise.all(that.feedList.map(that.updateFeed, that)).then(function () {
+					},
+					addFeed: function addFeed() {
+						var newFeed = new _Feed2.default();
+						that.displayPageAddFeed(newFeed);
+						history.pushState({ page: "newFeed", feed: newFeed }, null, "#newFeed");
+					},
+					editFeed: function editFeed(id) {
+						that.displayPageAddFeed(that.feedList[id]);
+						history.pushState({ page: "editFeed", feed: that.feedList[id] }, null, "#editFeed");
+					},
+					removeFeed: function removeFeed(id, event) {
+						event.stopPropagation();
+						(0, _reactDom.render)(_react2.default.createElement(ModalDialog, { text: "Remove " + that.feedList[id].name + "?", onYes: function onYes() {
+								that.storageController.removeFeed(that.feedList[id].linkUrl).then(function () {
 									that.displayPage();
 								});
-							},
-							addFeed: function addFeed() {
-								var newFeed = new _Feed2.default();
-								that.displayPageAddFeed(newFeed);
-								history.pushState({ page: "newFeed", feed: newFeed }, null, "#newFeed");
-							},
-							editFeed: function editFeed(id) {
-								that.displayPageAddFeed(that.feedList[id]);
-								history.pushState({ page: "editFeed", feed: that.feedList[id] }, null, "#editFeed");
-							},
-							removeFeed: function removeFeed(id, event) {
-								event.stopPropagation();
-								(0, _reactDom.render)(_react2.default.createElement(ModalDialog, { text: "Remove " + that.feedList[id].name + "?", onYes: function onYes() {
-										that.storageController.removeFeed(that.feedList[id].linkUrl).then(function () {
-											that.displayPage();
-										});
-									}, onNo: function onNo() {
-										document.getElementById('dialog').setAttribute('hidden', 'true');
-									} }), document.getElementById('dialog'));
-								document.getElementById('dialog').removeAttribute('hidden');
-							},
-							displayFeed: function displayFeed(id) {
-								that.displayPageViewFeed(that.feedList[id]);
-								history.pushState({ page: "viewFeed", feed: that.feedList[id] }, null, "#viewFeed");
-							},
-							render: function render() {
-								var _this = this;
+							}, onNo: function onNo() {
+								document.getElementById('dialog').setAttribute('hidden', 'true');
+							} }), document.getElementById('dialog'));
+						document.getElementById('dialog').removeAttribute('hidden');
+					},
+					displayFeed: function displayFeed(id) {
+						that.displayPageViewFeed(that.feedList[id]);
+						history.pushState({ page: "viewFeed", feed: that.feedList[id] }, null, "#viewFeed");
+					},
+					render: function render() {
+						var _this = this;
 
-								return _react2.default.createElement(
+						return _react2.default.createElement(
+							'div',
+							{ className: 'page-home' },
+							_react2.default.createElement(
+								'header',
+								{ className: 'header' },
+								_react2.default.createElement(
+									'h1',
+									{ className: 'header-title' },
+									'ProgRSS'
+								),
+								_react2.default.createElement(
+									'button',
+									{ className: 'bnRefreshAllFeeds button', 'aria-label': 'Refresh', onClick: this.updateAllFeeds },
+									'Update All'
+								),
+								_react2.default.createElement(
+									'button',
+									{ className: 'bnAddNewFeed button', 'aria-label': 'Add', onClick: this.addFeed },
+									'New Feed'
+								)
+							),
+							_react2.default.createElement(
+								'main',
+								{ id: 'main' },
+								_react2.default.createElement(
 									'div',
-									{ className: 'page-home' },
+									{ className: 'feed-container' },
 									_react2.default.createElement(
 										'header',
-										{ className: 'header' },
+										null,
 										_react2.default.createElement(
-											'h1',
-											{ className: 'header-title' },
-											'ProgRSS'
-										),
-										_react2.default.createElement(
-											'button',
-											{ className: 'bnRefreshAllFeeds button', 'aria-label': 'Refresh', onClick: this.updateAllFeeds },
-											'Update All'
-										),
-										_react2.default.createElement(
-											'button',
-											{ className: 'bnAddNewFeed button', 'aria-label': 'Add', onClick: this.addFeed },
-											'New Feed'
+											'h2',
+											null,
+											'Feeds'
 										)
 									),
 									_react2.default.createElement(
-										'main',
-										{ id: 'main' },
-										_react2.default.createElement(
-											'div',
-											{ className: 'feed-container' },
-											_react2.default.createElement(
-												'header',
-												null,
+										'ul',
+										{ className: 'feeds' },
+										this.props.feeds.map(function (elem, i) {
+											return _react2.default.createElement(
+												'li',
+												{ key: i, className: elem.isSuspended ? 'feed-suspended' : '', onClick: function onClick() {
+														return _this.displayFeed(i);
+													} },
 												_react2.default.createElement(
-													'h2',
+													'label',
 													null,
-													'Feeds'
-												)
-											),
-											_react2.default.createElement(
-												'ul',
-												{ className: 'feeds' },
-												this.props.feeds.map(function (elem, i) {
-													return _react2.default.createElement(
-														'li',
-														{ key: i, className: elem.isSuspended ? 'feed-suspended' : '', onClick: function onClick() {
-																return _this.displayFeed(i);
-															} },
+													elem.name,
+													' ',
+													_react2.default.createElement(
+														'span',
+														null,
 														_react2.default.createElement(
-															'label',
+															'strong',
 															null,
-															elem.name,
-															' ',
-															_react2.default.createElement(
-																'span',
-																null,
-																_react2.default.createElement(
-																	'strong',
-																	null,
-																	elem.numNew,
-																	' New'
-																)
-															)
-														),
-														_react2.default.createElement(
-															'button',
-															{ className: 'button-edit', 'aria-label': 'Edit', onClick: function onClick() {
-																	return _this.editFeed(i);
-																} },
-															'Edit'
-														),
-														_react2.default.createElement(
-															'button',
-															{ className: 'button-remove', 'data-id': elem.linkUrl, 'aria-label': 'Remove', onClick: function onClick(event) {
-																	return _this.removeFeed(i, event);
-																} },
-															'Remove'
+															elem.numNew,
+															' New'
 														)
-													);
-												})
-											),
-											_react2.default.createElement('div', { id: 'dialog' })
-										)
-									)
-								);
-							}
-						});
-						console.log("displayPage - Rendering");
-						(0, _reactDom.render)(_react2.default.createElement(PageHome, { feeds: that.feedList }), pageHolder);
-						document.body.className = "";
-						document.querySelector('.loader').setAttribute("hidden", "true");
-					});
+													)
+												),
+												_react2.default.createElement(
+													'button',
+													{ className: 'button-edit', 'aria-label': 'Edit', onClick: function onClick() {
+															return _this.editFeed(i);
+														} },
+													'Edit'
+												),
+												_react2.default.createElement(
+													'button',
+													{ className: 'button-remove', 'data-id': elem.linkUrl, 'aria-label': 'Remove', onClick: function onClick(event) {
+															return _this.removeFeed(i, event);
+														} },
+													'Remove'
+												)
+											);
+										})
+									),
+									_react2.default.createElement('div', { id: 'dialog' })
+								)
+							)
+						);
+					}
 				});
+				console.log("displayPage - Rendering");
+				(0, _reactDom.render)(_react2.default.createElement(PageHome, { feeds: that.feedList }), pageHolder);
+				document.body.className = "";
+				document.querySelector('.loader').setAttribute("hidden", "true");
 			});
 		}
 	}, {
