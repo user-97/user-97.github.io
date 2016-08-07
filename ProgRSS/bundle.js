@@ -485,34 +485,38 @@ var PageHomeController = function () {
 									if (isNew) feed.numNew += 1;
 								}));
 							}
-							if (typeof obj.item.push != "undefined") {
-								var item;
-								var _iteratorNormalCompletion = true;
-								var _didIteratorError = false;
-								var _iteratorError = undefined;
+							if (typeof obj.item != "undefined") {
+								if (typeof obj.item.push != "undefined") {
+									var item;
+									var _iteratorNormalCompletion = true;
+									var _didIteratorError = false;
+									var _iteratorError = undefined;
 
-								try {
-									for (var _iterator = obj.item[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-										item = _step.value;
-
-										addFeedItem(item);
-									}
-								} catch (err) {
-									_didIteratorError = true;
-									_iteratorError = err;
-								} finally {
 									try {
-										if (!_iteratorNormalCompletion && _iterator.return) {
-											_iterator.return();
+										for (var _iterator = obj.item[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+											item = _step.value;
+
+											addFeedItem(item);
 										}
+									} catch (err) {
+										_didIteratorError = true;
+										_iteratorError = err;
 									} finally {
-										if (_didIteratorError) {
-											throw _iteratorError;
+										try {
+											if (!_iteratorNormalCompletion && _iterator.return) {
+												_iterator.return();
+											}
+										} finally {
+											if (_didIteratorError) {
+												throw _iteratorError;
+											}
 										}
 									}
+								} else {
+									addFeedItem(obj.item);
 								}
 							} else {
-								addFeedItem(obj.item);
+								alert("Could not connect to " + feed.name);
 							}
 
 							var removeList = feedItemList.filter(function (elem) {
